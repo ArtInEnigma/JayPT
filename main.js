@@ -32,3 +32,14 @@ var jay_timeout_keep_speech_rec_working = null;
 var jay_speech_rec_supported = false;
 var jay_speaking_disabled = false;
 var jay_speech_rec_disabled = false;
+
+//This function will use the browser's speech synthesis API to speak the provided text out loud
+function jay_sayOutLoud(text) {
+  if (!text || jay_SPEAKING_DISABLED) {
+    if (jay_SPEECH_REC_SUPPORTED && jay_SPEECHREC && !jay_IS_LISTENING && !jay_PAUSED && !jay_SPEECHREC_DISABLED) jay_SPEECHREC.start();
+    clearTimeout(jay_TIMEOUT_KEEP_SPEECHREC_WORKING);
+    jay_TIMEOUT_KEEP_SPEECHREC_WORKING = setTimeout(jay_keepSpeechRecWorking, 100);
+    return;
+  }
+}
+
