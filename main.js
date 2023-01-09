@@ -43,3 +43,86 @@ function jay_sayOutLoud(text) {
   }
 }
 
+// Replace YOUR_API_KEY with your actual API key
+const apiKey = 'a07323382f5f3c0d3fa9775bbfe41bb848c18d33';
+
+// Replace en-US with the desired language code
+const languageCode = 'en-US';
+
+// Replace my-audio with the desired file name
+const fileName = 'my-audio';
+
+// Let's speak out loud
+console.log("Saying out loud: "+text);
+
+const audioElement = new Audio();
+
+const request = new XMLHttpRequest();
+request.open('POST', `https://texttospeech.googleapis.com/v1/text:synthesize?key=${a07323382f5f3c0d3fa9775bbfe41bb848c18d33}`, true);
+request.setRequestHeader('Content-Type', 'application/json');
+request.onload = function () {
+  // Check for request success
+  if (request.status >= 200 && request.status < 400) {
+    // Extract the audio content from the response
+    const response = JSON.parse(request.responseText);
+    const audioContent = response.audioContent;
+
+    // Set the audio content as the source of the audio element
+    audioElement.src = `data:audio/mp3;base64,${audioContent}`;
+
+    // Set up audio element events
+    audioElement.onplaying = () => {
+      // Make border green
+      $("#TTGPTSettings").css("border-bottom", "8px solid green");
+
+      // If speech recognition is active, disable it
+      if (CN_IS_LISTENING) CN_SPEECHREC.stop();
+
+      if (CN_FINISHED) return;
+      CN_IS_READING = true;
+      clearTimeout(CN_TIMEOUT_KEEP_SYNTHESIS_WORKING);
+      CN_TIMEOUT_KEEP_SYNTHESIS_WORKING = setTimeout(CN_KeepSpeechSynthesisActive, 5000);
+    };
+    audioElement.onended = () => {
+      // Make border grey again
+      $("#TTGPTSettings").css("border", "2px solid #888");
+
+      if (CN_FINISHED) return;
+
+      // Finished speaking
+      clearTimeout(CN_TIMEOUT_KEEP_SYNTHESIS_WORKING);
+      console.log("Finished speaking out loud");
+
+      // restart listening
+      CN_IS_READING = false;
+      setTimeout(function() {
+        if (!audioElement.paused) {
+          if (CN_SPEECH_REC_SUPPORTED && CN_SPEECHREC && !CN_IS_LISTENING && !CN_PAUSED && !CN_SPEECHREC_DISABLED) CN_SPEECHREC.start();
+          clearTimeout(CN_TIMEOUT_KEEP_SPEECHREC_WORKING);
+          CN_TIMEOUT_KEEP_SPEECHREC_WORKING = setTimeout(CN_KeepSpeechRecWorking, 5000)
+};
+
+// Set the request body to the synthesize request
+request.send(JSON.stringify({
+  input: {
+    text: text
+  },
+  voice: {
+    languageCode: languageCode
+  },
+  audioConfig: {
+    audioEncoding: 'MP3'
+  }
+}));
+
+// If a voice was specified, set the voice of the audio element
+if (CN_WANTED_VOICE) {
+  audioElement.voice = CN_WANTED_VOICE;
+}
+
+// Set the rate and pitch of the audio element
+audioElement.rate = CN_TEXT_TO_SPEECH_RATE;
+audioElement.pitch = CN_TEXT_TO_SPEECH_PITCH;
+
+// Play the audio
+audioElement.play();
