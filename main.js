@@ -99,7 +99,7 @@ request.onload = function () {
         if (!audioElement.paused) {
           if (CN_SPEECH_REC_SUPPORTED && CN_SPEECHREC && !CN_IS_LISTENING && !CN_PAUSED && !CN_SPEECHREC_DISABLED) CN_SPEECHREC.start();
           clearTimeout(CN_TIMEOUT_KEEP_SPEECHREC_WORKING);
-          CN_TIMEOUT_KEEP_SPEECHREC_WORKING = setTimeout(CN_KeepSpeechRecWorking, 5000)
+          CN_TIMEOUT_KEEP_SPEECHREC_WORKING = setTimeout(CN_KeepSpeechRecWorking, 100)
 };
 
 // Set the request body to the synthesize request
@@ -126,3 +126,27 @@ audioElement.pitch = CN_TEXT_TO_SPEECH_PITCH;
 
 // Play the audio
 audioElement.play();
+
+        // Split the text into sentences so the speech synthesis can start speaking as soon as possible
+function CN_SplitIntoSentences(text) {
+	var sentences = [];
+	var currentSentence = "";
+	
+	for(var i=0; i<text.length; i++) {
+		//
+		var currentChar = text[i];
+		
+		// Add character to current sentence
+		currentSentence += currentChar;
+		
+		// is the current character a delimiter? if so, add current part to array and clear
+		if (currentChar == ',' || currentChar == ':' || currentChar == '.' || currentChar == '!' || currentChar == '?' || currentChar == ';') {
+			if (currentSentence.trim() != "") sentences.push(currentSentence.trim());
+			currentSentence = "";
+		}
+	}
+	
+	return sentences;
+}
+        
+        
